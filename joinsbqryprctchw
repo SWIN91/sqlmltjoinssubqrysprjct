@@ -1,0 +1,113 @@
+-- #1 List all customers who live in Texas. Use JOIN.
+
+-- First, I need to take a look at all the ids and columns.
+
+SELECT * FROM customer; -- customer_id, store_id, first_name, last_name, address_id
+SELECT * FROM city;     -- city_id, city which displays cities, country_id
+SELECT * FROM country;  -- country_id, also the country column displays names of countries
+SELECT * FROM address;  -- address_id, address, address2, district column which displays names of states, city_id, postal_code
+
+-- Next, I will JOIN using customer.address_id and address.address_id.
+
+SELECT c.customer_id, c.first_name, c.last_name, a.address, a.address2, a.district
+FROM customer AS c
+INNER JOIN address AS a
+ON c.address_id = a.address_id
+WHERE a.district LIKE 'Texas';
+
+
+
+-- #2 Get all payments above $6.99 with the customer's full name.
+
+
+-- Let me take a look at the 'payment' table.
+SELECT * FROM payment; -- payment_id, customer_id, amount
+
+
+-- I will JOIN using customer.customer_id and payment.customer_id
+
+SELECT c.customer_id, c.first_name, c.last_name, p.amount
+FROM customer AS c
+INNER JOIN payment AS p
+ON c.customer_id = p.customer_id
+WHERE p.amount > 6.99
+ORDER BY p.amount DESC;
+
+
+-- #3 Show the names of all the customers who made payments over $175. Use subqueries.
+SELECT first_name, last_name
+FROM customer
+WHERE customer_id IN(
+	SELECT customer_id
+	FROM payment
+	GROUP BY customer_id
+	HAVING SUM(amount) > 175
+	ORDER BY SUM(amount) DESC
+);
+-- Not sure how to format this to where it also displays the amounts.
+
+
+
+-- #4 List all customers that live in Nepal. Use the 'city' table.
+
+
+-- I've gotta look at this again.
+SELECT * FROM country;  -- country_id, also the country column displays names of countries
+SELECT * FROM city;     -- city_id, city which displays cities, country_id
+SELECT * FROM address;  -- address_id, address, address2, district column which displays names of states, city_id, postal_code
+SELECT * FROM customer; -- customer_id, store_id, first_name, last_name, address_id
+
+
+
+
+-- I'll JOIN the 'city' and 'country' tables using city.country_id and country.country_id
+
+SELECT *
+FROM country
+INNER JOIN city
+ON country.country_id = city.country_id
+INNER JOIN address
+ON city.city_id = address.city_id
+INNER JOIN customer
+ON address.address_id = customer.customer_id
+WHERE country.country LIKE  'Nepal';
+
+-- Yeah... not sure if this is it or not...
+
+-- #5. Which staff member had the most transactions?
+SELECT * FROM staff;
+SELECT * FROM payment;
+
+
+SELECT staff_id, COUNT(staff_id)
+FROM payment
+GROUP BY staff_id;
+
+SELECT first_name, last_name FROM staff WHERE staff_id = 2;
+
+-- #6. How many movies of each rating are there?
+SELECT COUNT(film_id) FROM film WHERE rating = 'R';
+SELECT COUNT(film_id) FROM film WHERE rating = 'NC-17';
+SELECT COUNT(film_id) FROM film WHERE rating = 'G';
+SELECT COUNT(film_id) FROM film WHERE rating = 'PG';
+SELECT COUNT(film_id) FROM film WHERE rating = 'PG-13';
+
+-- #7. Show all customers who have made a single payment above $6.99. Use subqueries. 
+SELECT customer_id, first_name, last_name
+FROM customer
+WHERE customer_id IN(
+	SELECT customer_id
+	FROM payment
+	GROUP BY customer_id
+	HAVING SUM(amount) > 6.99
+	ORDER BY SUM(amount) DESC
+);
+-- I still don't really get this. Need to watch the video on subqueries. I get a lot of errors with other things I try.
+
+
+-- #8. How many free rentals did our stores give away?
+SELECT COUNT(amount) FROM payment WHERE amount = 0;
+
+
+
+
